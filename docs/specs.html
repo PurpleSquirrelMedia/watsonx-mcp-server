@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technical Specifications - watsonx MCP Server</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ibm-blue: #0f62fe;
+            --carbon-gray-100: #161616;
+            --carbon-gray-90: #262626;
+            --carbon-gray-80: #393939;
+            --carbon-gray-70: #525252;
+            --carbon-gray-50: #8d8d8d;
+            --carbon-gray-30: #c6c6c6;
+            --carbon-gray-10: #f4f4f4;
+            --purple: #8a3ffc;
+            --teal: #009d9a;
+            --green: #24a148;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            background: var(--carbon-gray-100);
+            color: var(--carbon-gray-10);
+            line-height: 1.7;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        nav {
+            background: var(--carbon-gray-90);
+            border-bottom: 1px solid var(--carbon-gray-80);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav a {
+            color: var(--carbon-gray-30);
+            text-decoration: none;
+            margin-right: 2rem;
+            font-size: 0.875rem;
+        }
+
+        nav a:hover, nav a.active {
+            color: var(--ibm-blue);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        h1 span { color: var(--ibm-blue); }
+
+        .tagline {
+            color: var(--carbon-gray-50);
+            font-size: 1.125rem;
+            margin-bottom: 3rem;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            margin: 3rem 0 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--carbon-gray-80);
+        }
+
+        h3 {
+            font-size: 1.125rem;
+            margin: 2rem 0 1rem;
+            color: var(--ibm-blue);
+        }
+
+        p { margin-bottom: 1rem; }
+
+        code {
+            font-family: 'IBM Plex Mono', monospace;
+            background: var(--carbon-gray-90);
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-size: 0.875em;
+        }
+
+        pre {
+            background: var(--carbon-gray-90);
+            border: 1px solid var(--carbon-gray-80);
+            padding: 1.5rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--carbon-gray-80);
+        }
+
+        th {
+            background: var(--carbon-gray-90);
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: var(--carbon-gray-90);
+        }
+
+        .spec-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .spec-card {
+            background: var(--carbon-gray-90);
+            border: 1px solid var(--carbon-gray-80);
+            padding: 1.5rem;
+        }
+
+        .spec-card h4 {
+            font-size: 0.875rem;
+            color: var(--carbon-gray-50);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .spec-card .value {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .badge {
+            display: inline-block;
+            background: var(--carbon-gray-80);
+            padding: 0.25rem 0.5rem;
+            border-radius: 2px;
+            font-size: 0.75rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .badge.blue { background: var(--ibm-blue); }
+        .badge.green { background: var(--green); }
+        .badge.purple { background: var(--purple); }
+
+        ul {
+            margin: 1rem 0;
+            padding-left: 1.5rem;
+        }
+
+        li { margin-bottom: 0.5rem; }
+
+        .callout {
+            background: var(--carbon-gray-90);
+            border-left: 4px solid var(--ibm-blue);
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .callout.warning {
+            border-color: #f1c21b;
+        }
+
+        a { color: var(--ibm-blue); }
+        a:hover { text-decoration: none; }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="specs.html" class="active">Specifications</a>
+        <a href="https://github.com/ExpertVagabond/watsonx-mcp-server">GitHub</a>
+    </nav>
+
+    <div class="container">
+        <h1>Technical <span>Specifications</span></h1>
+        <p class="tagline">Complete documentation for the watsonx MCP Server integration</p>
+
+        <h2>System Overview</h2>
+
+        <div class="spec-grid">
+            <div class="spec-card">
+                <h4>Protocol</h4>
+                <div class="value">MCP 1.0</div>
+                <p style="font-size: 0.875rem; color: var(--carbon-gray-50); margin-top: 0.5rem;">Model Context Protocol</p>
+            </div>
+            <div class="spec-card">
+                <h4>Transport</h4>
+                <div class="value">stdio</div>
+                <p style="font-size: 0.875rem; color: var(--carbon-gray-50); margin-top: 0.5rem;">Standard I/O streams</p>
+            </div>
+            <div class="spec-card">
+                <h4>Runtime</h4>
+                <div class="value">Node.js 18+</div>
+                <p style="font-size: 0.875rem; color: var(--carbon-gray-50); margin-top: 0.5rem;">ES Modules</p>
+            </div>
+            <div class="spec-card">
+                <h4>Region</h4>
+                <div class="value">us-south</div>
+                <p style="font-size: 0.875rem; color: var(--carbon-gray-50); margin-top: 0.5rem;">Dallas, TX</p>
+            </div>
+        </div>
+
+        <h2>Architecture</h2>
+
+        <p>The watsonx MCP Server implements a <strong>two-agent architecture</strong> where Claude (Opus 4.5) acts as the primary reasoning agent and can delegate specific tasks to IBM watsonx.ai foundation models.</p>
+
+        <pre>
+┌─────────────────────────────────────────────────────────────────┐
+│                        CLIENT LAYER                              │
+│  ┌─────────────────────────────────────────────────────────┐    │
+│  │              Claude Code CLI / Desktop                   │    │
+│  │                  (Claude Opus 4.5)                       │    │
+│  └───────────────────────┬─────────────────────────────────┘    │
+└──────────────────────────│──────────────────────────────────────┘
+                           │ MCP Protocol (JSON-RPC over stdio)
+                           ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                       MCP SERVER LAYER                           │
+│  ┌─────────────────────────────────────────────────────────┐    │
+│  │              watsonx-mcp-server (Node.js)                │    │
+│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐      │    │
+│  │  │  generate   │  │    chat     │  │ embeddings  │      │    │
+│  │  └─────────────┘  └─────────────┘  └─────────────┘      │    │
+│  └───────────────────────┬─────────────────────────────────┘    │
+└──────────────────────────│──────────────────────────────────────┘
+                           │ HTTPS + IAM Authentication
+                           ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                     IBM CLOUD LAYER                              │
+│  ┌─────────────────────────────────────────────────────────┐    │
+│  │              watsonx.ai (us-south.ml.cloud.ibm.com)      │    │
+│  │  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐    │    │
+│  │  │ Granite │  │ Llama 3 │  │ Mistral │  │  Slate  │    │    │
+│  │  └─────────┘  └─────────┘  └─────────┘  └─────────┘    │    │
+│  └─────────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────────┘
+        </pre>
+
+        <h2>Tool Specifications</h2>
+
+        <h3>watsonx_generate</h3>
+        <p>Generate text completions using foundation models.</p>
+
+        <table>
+            <tr>
+                <th>Parameter</th>
+                <th>Type</th>
+                <th>Required</th>
+                <th>Default</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td><code>prompt</code></td>
+                <td>string</td>
+                <td>Yes</td>
+                <td>-</td>
+                <td>Input text prompt</td>
+            </tr>
+            <tr>
+                <td><code>model_id</code></td>
+                <td>string</td>
+                <td>No</td>
+                <td>ibm/granite-13b-chat-v2</td>
+                <td>Foundation model identifier</td>
+            </tr>
+            <tr>
+                <td><code>max_new_tokens</code></td>
+                <td>number</td>
+                <td>No</td>
+                <td>500</td>
+                <td>Maximum tokens to generate</td>
+            </tr>
+            <tr>
+                <td><code>temperature</code></td>
+                <td>number</td>
+                <td>No</td>
+                <td>0.7</td>
+                <td>Sampling temperature (0-2)</td>
+            </tr>
+            <tr>
+                <td><code>top_p</code></td>
+                <td>number</td>
+                <td>No</td>
+                <td>1.0</td>
+                <td>Nucleus sampling probability</td>
+            </tr>
+            <tr>
+                <td><code>top_k</code></td>
+                <td>number</td>
+                <td>No</td>
+                <td>50</td>
+                <td>Top-k sampling</td>
+            </tr>
+        </table>
+
+        <h3>watsonx_chat</h3>
+        <p>Multi-turn conversation with chat models.</p>
+
+        <table>
+            <tr>
+                <th>Parameter</th>
+                <th>Type</th>
+                <th>Required</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td><code>messages</code></td>
+                <td>array</td>
+                <td>Yes</td>
+                <td>Array of {role, content} objects</td>
+            </tr>
+            <tr>
+                <td><code>model_id</code></td>
+                <td>string</td>
+                <td>No</td>
+                <td>Chat model to use</td>
+            </tr>
+            <tr>
+                <td><code>max_new_tokens</code></td>
+                <td>number</td>
+                <td>No</td>
+                <td>Maximum response length</td>
+            </tr>
+            <tr>
+                <td><code>temperature</code></td>
+                <td>number</td>
+                <td>No</td>
+                <td>Response randomness</td>
+            </tr>
+        </table>
+
+        <p>Message roles:</p>
+        <ul>
+            <li><code>system</code> - System instructions</li>
+            <li><code>user</code> - User input</li>
+            <li><code>assistant</code> - Model response</li>
+        </ul>
+
+        <h3>watsonx_embeddings</h3>
+        <p>Generate vector embeddings for semantic search and RAG.</p>
+
+        <table>
+            <tr>
+                <th>Parameter</th>
+                <th>Type</th>
+                <th>Required</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td><code>texts</code></td>
+                <td>array[string]</td>
+                <td>Yes</td>
+                <td>Texts to embed</td>
+            </tr>
+            <tr>
+                <td><code>model_id</code></td>
+                <td>string</td>
+                <td>No</td>
+                <td>Embedding model (default: slate-125m)</td>
+            </tr>
+        </table>
+
+        <h3>watsonx_list_models</h3>
+        <p>List all available foundation models.</p>
+        <p>No parameters required. Returns array of model objects with id, name, provider, and tasks.</p>
+
+        <h2>Available Models</h2>
+
+        <h3>Text Generation Models</h3>
+        <table>
+            <tr>
+                <th>Model ID</th>
+                <th>Provider</th>
+                <th>Parameters</th>
+                <th>Use Case</th>
+            </tr>
+            <tr>
+                <td><code>ibm/granite-13b-chat-v2</code></td>
+                <td>IBM</td>
+                <td>13B</td>
+                <td>General chat, instruction following</td>
+            </tr>
+            <tr>
+                <td><code>ibm/granite-3-8b-instruct</code></td>
+                <td>IBM</td>
+                <td>8B</td>
+                <td>Latest Granite, fast inference</td>
+            </tr>
+            <tr>
+                <td><code>meta-llama/llama-3-70b-instruct</code></td>
+                <td>Meta</td>
+                <td>70B</td>
+                <td>Complex reasoning, high quality</td>
+            </tr>
+            <tr>
+                <td><code>meta-llama/llama-3-8b-instruct</code></td>
+                <td>Meta</td>
+                <td>8B</td>
+                <td>Fast, efficient generation</td>
+            </tr>
+            <tr>
+                <td><code>mistralai/mistral-large</code></td>
+                <td>Mistral AI</td>
+                <td>-</td>
+                <td>Multilingual, reasoning</td>
+            </tr>
+            <tr>
+                <td><code>mistralai/mixtral-8x7b-instruct-v01</code></td>
+                <td>Mistral AI</td>
+                <td>8x7B MoE</td>
+                <td>Efficient, high quality</td>
+            </tr>
+        </table>
+
+        <h3>Embedding Models</h3>
+        <table>
+            <tr>
+                <th>Model ID</th>
+                <th>Dimensions</th>
+                <th>Use Case</th>
+            </tr>
+            <tr>
+                <td><code>ibm/slate-125m-english-rtrvr</code></td>
+                <td>768</td>
+                <td>English semantic search, RAG</td>
+            </tr>
+            <tr>
+                <td><code>ibm/slate-30m-english-rtrvr</code></td>
+                <td>384</td>
+                <td>Lightweight embedding</td>
+            </tr>
+        </table>
+
+        <h2>Configuration</h2>
+
+        <h3>Environment Variables</h3>
+        <table>
+            <tr>
+                <th>Variable</th>
+                <th>Required</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td><code>WATSONX_API_KEY</code></td>
+                <td>Yes</td>
+                <td>IBM Cloud API key</td>
+            </tr>
+            <tr>
+                <td><code>WATSONX_URL</code></td>
+                <td>No</td>
+                <td>Service URL (default: us-south)</td>
+            </tr>
+            <tr>
+                <td><code>WATSONX_PROJECT_ID</code></td>
+                <td>No</td>
+                <td>Project ID for scoped operations</td>
+            </tr>
+        </table>
+
+        <h3>Claude Code Configuration</h3>
+        <pre>
+// ~/.claude.json
+{
+  "mcpServers": {
+    "watsonx": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["/path/to/watsonx-mcp-server/index.js"],
+      "env": {
+        "WATSONX_API_KEY": "your-api-key",
+        "WATSONX_URL": "https://us-south.ml.cloud.ibm.com"
+      }
+    }
+  }
+}
+        </pre>
+
+        <h2>Dependencies</h2>
+
+        <table>
+            <tr>
+                <th>Package</th>
+                <th>Version</th>
+                <th>Purpose</th>
+            </tr>
+            <tr>
+                <td><code>@modelcontextprotocol/sdk</code></td>
+                <td>^1.24.3</td>
+                <td>MCP server framework</td>
+            </tr>
+            <tr>
+                <td><code>@ibm-cloud/watsonx-ai</code></td>
+                <td>^1.7.5</td>
+                <td>IBM watsonx.ai SDK</td>
+            </tr>
+            <tr>
+                <td><code>ibm-cloud-sdk-core</code></td>
+                <td>^5.4.5</td>
+                <td>IAM authentication</td>
+            </tr>
+        </table>
+
+        <h2>Use Cases</h2>
+
+        <div class="callout">
+            <strong>When to delegate to watsonx:</strong>
+            <ul style="margin-top: 0.5rem;">
+                <li>IBM-specific model capabilities (Granite enterprise features)</li>
+                <li>Batch inference on large datasets</li>
+                <li>Embedding generation for RAG pipelines</li>
+                <li>Cost optimization with smaller models</li>
+                <li>Regulatory compliance requiring IBM infrastructure</li>
+            </ul>
+        </div>
+
+        <h3>Example: RAG Pipeline</h3>
+        <pre>
+// 1. Generate embeddings with watsonx
+User: "Embed these documents for search"
+Claude: [calls watsonx_embeddings with document texts]
+
+// 2. Store in vector database
+// 3. Query with user question embedding
+// 4. Claude synthesizes final answer
+        </pre>
+
+        <h3>Example: Multi-Model Reasoning</h3>
+        <pre>
+// Claude handles complex reasoning
+// Delegates specific tasks to specialized models
+
+User: "Analyze this legal document"
+
+Claude (Opus 4.5):
+  → Understands context, plans analysis
+  → Calls watsonx_generate with Granite for compliance check
+  → Synthesizes results with own analysis
+        </pre>
+
+        <h2>Free Tier Limits</h2>
+
+        <div class="callout warning">
+            <strong>watsonx.ai Lite Plan:</strong>
+            <ul style="margin-top: 0.5rem;">
+                <li>Limited inference tokens per month</li>
+                <li>Access to select foundation models</li>
+                <li>Single user/project</li>
+                <li>No SLA guarantees</li>
+            </ul>
+        </div>
+
+        <h2>Error Handling</h2>
+
+        <p>The server returns structured error messages:</p>
+        <pre>
+{
+  "content": [{
+    "type": "text",
+    "text": "Error calling watsonx.ai: [error message]"
+  }]
+}
+        </pre>
+
+        <p>Common errors:</p>
+        <ul>
+            <li><code>401 Unauthorized</code> - Invalid API key</li>
+            <li><code>403 Forbidden</code> - Insufficient permissions</li>
+            <li><code>429 Too Many Requests</code> - Rate limit exceeded</li>
+            <li><code>Model not found</code> - Invalid model_id</li>
+        </ul>
+
+        <h2>Security</h2>
+
+        <ul>
+            <li>API keys stored in environment variables, not code</li>
+            <li>IAM token-based authentication</li>
+            <li>All traffic over HTTPS</li>
+            <li>No data persistence in MCP server</li>
+        </ul>
+
+        <hr style="margin: 3rem 0; border: none; border-top: 1px solid var(--carbon-gray-80);">
+
+        <p style="text-align: center; color: var(--carbon-gray-50);">
+            <a href="https://github.com/ExpertVagabond/watsonx-mcp-server">View Source</a> |
+            <a href="https://www.ibm.com/watsonx">IBM watsonx.ai</a> |
+            <a href="https://modelcontextprotocol.io">MCP Protocol</a>
+        </p>
+    </div>
+</body>
+</html>

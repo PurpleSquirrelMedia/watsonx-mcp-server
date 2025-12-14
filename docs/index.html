@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>watsonx MCP Server - Claude + IBM watsonx.ai Integration</title>
+    <meta name="description" content="MCP server enabling Claude to delegate tasks to IBM watsonx.ai foundation models (Granite, Llama, Mistral)">
+    <meta property="og:title" content="watsonx MCP Server">
+    <meta property="og:description" content="Two-agent AI system: Claude + IBM watsonx.ai via Model Context Protocol">
+    <meta property="og:image" content="https://expertvagabond.github.io/watsonx-mcp-server/preview.png">
+    <meta property="og:url" content="https://expertvagabond.github.io/watsonx-mcp-server/">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ibm-blue: #0f62fe;
+            --ibm-blue-hover: #0353e9;
+            --carbon-gray-100: #161616;
+            --carbon-gray-90: #262626;
+            --carbon-gray-80: #393939;
+            --carbon-gray-70: #525252;
+            --carbon-gray-50: #8d8d8d;
+            --carbon-gray-30: #c6c6c6;
+            --carbon-gray-10: #f4f4f4;
+            --purple: #8a3ffc;
+            --cyan: #1192e8;
+            --teal: #009d9a;
+            --green: #24a148;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--carbon-gray-100);
+            color: var(--carbon-gray-10);
+            line-height: 1.6;
+        }
+
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, var(--carbon-gray-100) 0%, var(--carbon-gray-90) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 80%;
+            height: 200%;
+            background: radial-gradient(ellipse at center, rgba(15, 98, 254, 0.15) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--carbon-gray-80);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            margin-bottom: 1.5rem;
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        .badge-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--green);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 600;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        h1 span {
+            color: var(--ibm-blue);
+        }
+
+        .subtitle {
+            font-size: 1.25rem;
+            color: var(--carbon-gray-50);
+            max-width: 600px;
+            margin-bottom: 2rem;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 3rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.875rem 1.5rem;
+            border-radius: 0;
+            font-size: 1rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.15s ease;
+            font-family: 'IBM Plex Sans', sans-serif;
+        }
+
+        .btn-primary {
+            background: var(--ibm-blue);
+            color: white;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: var(--ibm-blue-hover);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 1px solid var(--carbon-gray-70);
+        }
+
+        .btn-secondary:hover {
+            background: var(--carbon-gray-80);
+            border-color: var(--carbon-gray-50);
+        }
+
+        .architecture {
+            background: var(--carbon-gray-90);
+            border: 1px solid var(--carbon-gray-80);
+            padding: 2rem;
+            margin-top: 2rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+        }
+
+        .architecture pre {
+            color: var(--carbon-gray-30);
+        }
+
+        .architecture .highlight {
+            color: var(--ibm-blue);
+        }
+
+        .architecture .purple {
+            color: var(--purple);
+        }
+
+        .architecture .teal {
+            color: var(--teal);
+        }
+
+        .features {
+            padding: 6rem 2rem;
+            background: var(--carbon-gray-90);
+        }
+
+        .features h2 {
+            font-size: 2rem;
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background: var(--carbon-gray-100);
+            border: 1px solid var(--carbon-gray-80);
+            padding: 1.5rem;
+            transition: border-color 0.15s ease;
+        }
+
+        .feature-card:hover {
+            border-color: var(--ibm-blue);
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--carbon-gray-80);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.125rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-card p {
+            color: var(--carbon-gray-50);
+            font-size: 0.875rem;
+        }
+
+        .code-section {
+            padding: 6rem 2rem;
+            background: var(--carbon-gray-100);
+        }
+
+        .code-section h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .code-section .subtitle {
+            text-align: center;
+            margin: 0 auto 3rem;
+        }
+
+        .code-block {
+            background: var(--carbon-gray-90);
+            border: 1px solid var(--carbon-gray-80);
+            max-width: 800px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .code-header {
+            background: var(--carbon-gray-80);
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--carbon-gray-50);
+        }
+
+        .code-dots {
+            display: flex;
+            gap: 6px;
+            margin-right: 1rem;
+        }
+
+        .code-dots span {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--carbon-gray-70);
+        }
+
+        .code-content {
+            padding: 1.5rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.875rem;
+            line-height: 1.8;
+            overflow-x: auto;
+        }
+
+        .code-content .comment {
+            color: var(--carbon-gray-50);
+        }
+
+        .code-content .keyword {
+            color: var(--purple);
+        }
+
+        .code-content .string {
+            color: var(--teal);
+        }
+
+        .code-content .function {
+            color: var(--ibm-blue);
+        }
+
+        .models-section {
+            padding: 6rem 2rem;
+            background: var(--carbon-gray-90);
+        }
+
+        .models-section h2 {
+            font-size: 2rem;
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+
+        .models-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .model-tag {
+            background: var(--carbon-gray-100);
+            border: 1px solid var(--carbon-gray-80);
+            padding: 1rem;
+            text-align: center;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.875rem;
+            transition: all 0.15s ease;
+        }
+
+        .model-tag:hover {
+            border-color: var(--ibm-blue);
+            transform: translateY(-2px);
+        }
+
+        .model-tag .provider {
+            color: var(--carbon-gray-50);
+            font-size: 0.75rem;
+            display: block;
+            margin-top: 0.25rem;
+        }
+
+        footer {
+            padding: 3rem 2rem;
+            background: var(--carbon-gray-100);
+            border-top: 1px solid var(--carbon-gray-80);
+            text-align: center;
+        }
+
+        footer p {
+            color: var(--carbon-gray-50);
+            font-size: 0.875rem;
+        }
+
+        footer a {
+            color: var(--ibm-blue);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        .logo-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .logo-row img {
+            height: 40px;
+            opacity: 0.8;
+            filter: grayscale(100%) brightness(2);
+            transition: all 0.15s ease;
+        }
+
+        .logo-row img:hover {
+            opacity: 1;
+            filter: none;
+        }
+
+        @media (max-width: 768px) {
+            .hero {
+                padding: 4rem 1.5rem;
+            }
+
+            .architecture {
+                font-size: 0.75rem;
+                padding: 1rem;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <section class="hero">
+        <div class="container">
+            <div class="badge">
+                <span class="badge-dot"></span>
+                Model Context Protocol
+            </div>
+            <h1>watsonx <span>MCP</span> Server</h1>
+            <p class="subtitle">
+                Enable Claude to delegate tasks to IBM watsonx.ai foundation models.
+                Build powerful two-agent AI systems with Granite, Llama, and Mistral models.
+            </p>
+            <div class="cta-buttons">
+                <a href="https://github.com/ExpertVagabond/watsonx-mcp-server" class="btn btn-primary">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    View on GitHub
+                </a>
+                <a href="#quickstart" class="btn btn-secondary">
+                    Quick Start Guide
+                </a>
+            </div>
+
+            <div class="architecture">
+<pre>
+<span class="purple">Claude Code (Opus 4.5)</span>          <span class="highlight">Two-Agent Architecture</span>
+         │
+         │  MCP Protocol
+         ▼
+<span class="teal">┌─────────────────────────┐</span>
+<span class="teal">│  watsonx MCP Server     │</span>     Tools:
+<span class="teal">│  ───────────────────    │</span>     • watsonx_generate
+<span class="teal">│  Node.js + IBM SDK      │</span>     • watsonx_chat
+<span class="teal">└───────────┬─────────────┘</span>     • watsonx_embeddings
+            │                      • watsonx_list_models
+            │  REST API
+            ▼
+<span class="highlight">┌─────────────────────────┐</span>
+<span class="highlight">│   IBM watsonx.ai        │</span>     Foundation Models:
+<span class="highlight">│   ───────────────────   │</span>     • Granite (IBM)
+<span class="highlight">│   us-south region       │</span>     • Llama 3 (Meta)
+<span class="highlight">└─────────────────────────┘</span>     • Mistral
+</pre>
+            </div>
+        </div>
+    </section>
+
+    <section class="features">
+        <div class="container">
+            <h2>Available Tools</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">&#x1F4DD;</div>
+                    <h3>watsonx_generate</h3>
+                    <p>Generate text completions using IBM foundation models. Control temperature, top-p, top-k, and max tokens.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#x1F4AC;</div>
+                    <h3>watsonx_chat</h3>
+                    <p>Multi-turn conversations with system prompts. Perfect for building chatbots and assistants.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#x1F9E0;</div>
+                    <h3>watsonx_embeddings</h3>
+                    <p>Generate vector embeddings for RAG pipelines, semantic search, and document similarity.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#x1F4CB;</div>
+                    <h3>watsonx_list_models</h3>
+                    <p>Discover all available foundation models with their capabilities and providers.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="code-section" id="quickstart">
+        <div class="container">
+            <h2>Quick Start</h2>
+            <p class="subtitle">Add to your Claude Code configuration in ~/.claude.json</p>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <div class="code-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                    ~/.claude.json
+                </div>
+                <div class="code-content">
+<span class="comment">// Add to mcpServers object</span>
+{
+  <span class="string">"mcpServers"</span>: {
+    <span class="string">"watsonx"</span>: {
+      <span class="string">"type"</span>: <span class="string">"stdio"</span>,
+      <span class="string">"command"</span>: <span class="string">"node"</span>,
+      <span class="string">"args"</span>: [<span class="string">"/path/to/watsonx-mcp-server/index.js"</span>],
+      <span class="string">"env"</span>: {
+        <span class="string">"WATSONX_API_KEY"</span>: <span class="string">"your-ibm-cloud-api-key"</span>,
+        <span class="string">"WATSONX_URL"</span>: <span class="string">"https://us-south.ml.cloud.ibm.com"</span>
+      }
+    }
+  }
+}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="models-section">
+        <div class="container">
+            <h2>Supported Models</h2>
+            <div class="models-grid">
+                <div class="model-tag">
+                    granite-13b-chat-v2
+                    <span class="provider">IBM</span>
+                </div>
+                <div class="model-tag">
+                    granite-3-8b-instruct
+                    <span class="provider">IBM</span>
+                </div>
+                <div class="model-tag">
+                    llama-3-70b-instruct
+                    <span class="provider">Meta</span>
+                </div>
+                <div class="model-tag">
+                    llama-3-8b-instruct
+                    <span class="provider">Meta</span>
+                </div>
+                <div class="model-tag">
+                    mistral-large
+                    <span class="provider">Mistral AI</span>
+                </div>
+                <div class="model-tag">
+                    mixtral-8x7b-instruct
+                    <span class="provider">Mistral AI</span>
+                </div>
+                <div class="model-tag">
+                    slate-125m-english-rtrvr
+                    <span class="provider">IBM (Embeddings)</span>
+                </div>
+                <div class="model-tag">
+                    + Many More
+                    <span class="provider">Use watsonx_list_models</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>
+            Built by <a href="https://github.com/ExpertVagabond">Matthew Karsten</a> |
+            <a href="https://github.com/ExpertVagabond/watsonx-mcp-server">Source Code</a> |
+            MIT License
+        </p>
+        <p style="margin-top: 0.5rem;">
+            Powered by <a href="https://www.ibm.com/watsonx">IBM watsonx.ai</a> and
+            <a href="https://modelcontextprotocol.io">Model Context Protocol</a>
+        </p>
+    </footer>
+</body>
+</html>
